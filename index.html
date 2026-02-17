@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3E Logistics</title>
+  <style>
+    /* --- 1. GLOBAL SYSTEM --- */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #9aff9a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* --- 2. THE TWO GRAINS (GRID + SCANLINE) --- */
+    #bg-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(154, 255, 154, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(154, 255, 154, 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    #scan-line {
+      position: absolute;
+      left: 0;
+      width: 100vw;
+      height: 1px;
+      background: rgba(154, 255, 154, 0.2);
+      animation: scanVertical 10s linear infinite;
+    }
+
+    @keyframes scanVertical {
+      0% { top: -2%; }
+      100% { top: 102%; }
+    }
+
+    /* --- 3. UNIFORM CONTENT --- */
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    h1 {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .address {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-top: 1px solid #133;
+      padding-top: 20px;
+      margin-top: 30px;
+    }
+
+    p {
+      font-size: 11px;
+      opacity: 0.8;
+      margin: 8px 0;
+    }
+
+    .highlight {
+      color: #9aff9a;
+      font-weight: bold;
+    }
+
+    /* --- 4. GREEN MAP & CONVERGENT ARCS --- */
+    .map-wrapper {
+      position: relative;
+      width: 100%;
+      height: 350px;
+      margin-top: 40px;
+      border: 1px solid #133;
+      background: #000;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      /* Monochromatic Green Filter */
+      filter: sepia(100%) hue-rotate(85deg) brightness(0.6) contrast(1.2) invert(1);
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .hud-label {
+      font-size: 9px;
+      opacity: 0.4;
+      margin-top: 10px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+<div id="bg-layer">
+  <div id="grid"></div>
+  <div id="scan-line"></div>
+</div>
+
+<div class="container">
+  <h1>Entry Sequence</h1>
+  <div class="address">1004 UNION ST / APT 3E</div>
+
+  <section>
+    <h2>Step 1: Front Door</h2>
+    <p>• Locate the <span class="highlight">Call Box</span>.</p>
+    <p>• Dial <span class="highlight">308 + CALL</span> or find <span class="highlight">3E-01</span>.</p>
+    <p>• I must answer my phone to buzz you in.</p>
+    <p style="opacity: 0.4;">(Note: Direct calls/texts do not unlock the door.)</p>
+  </section>
+
+  <section>
+    <h2>Step 2: Inside</h2>
+    <p>• <span class="highlight">DO NOT</span> use the front stairs.</p>
+    <p>• Walk to the <span class="highlight">BACK</span> of the hallway.</p>
+    <p>• Use the <span class="highlight">BACK STAIRS</span> to reach 3E.</p>
+  </section>
+
+  <div class="map-wrapper">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3025.218447816041!2d-73.96145342341908!3d40.669145638890474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25b084992925b%3A0x6d907f14b3d739e1!2s1004%20Union%20St%2C%20Brooklyn%2C%20NY%2011225!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"></iframe>
+    <canvas id="arc-canvas"></canvas>
+  </div>
+  <div class="hud-label">VECTORS: CONVERGING ON SITE</div>
+</div>
+
+<script>
+  const canvas = document.getElementById("arc-canvas");
+  const ctx = canvas.getContext("2d");
+  const DPR = window.devicePixelRatio || 1;
+
+  function resize() {
+    canvas.width = canvas.offsetWidth * DPR;
+    canvas.height = canvas.offsetHeight * DPR;
+    ctx.scale(DPR, DPR);
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  let phase = 0;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
+    const cx = (canvas.width / DPR) / 2;
+    const cy = (canvas.height / DPR) / 2;
+    const maxR = Math.max(cx, cy) * 1.2;
+
+    for (let i = 0; i < 10; i++) {
+      let r = (maxR - ((phase * 100 + i * 40) % maxR));
+      if (r > 0) {
+        const opacity = (1 - (r / maxR)) * 0.5;
+        ctx.strokeStyle = `rgba(154, 255, 154, ${opacity})`;
+        ctx.lineWidth = 1;
+
+        for (let j = 0; j < 4; j++) {
+          let start = (j * Math.PI / 2) + (phase * 0.1);
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, start, start + 0.3);
+          ctx.stroke();
+        }
+      }
+    }
+    phase += 0.04;
+    requestAnimationFrame(draw);
+  }
+  draw();
+</script>
+
+</body>
+</html>
+
