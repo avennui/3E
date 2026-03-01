@@ -17,7 +17,7 @@
       overflow-x: hidden;
     }
 
-    /* --- 2. THE TWO GRAINS (GRID + SCANLINE) --- */
+    /* --- 2. ATMOSPHERIC LAYERS --- */
     #bg-layer {
       position: fixed;
       top: 0;
@@ -26,91 +26,116 @@
       height: 100vh;
       pointer-events: none;
       z-index: 0;
-    }
-
-    #grid {
-      position: absolute;
-      inset: 0;
-      background-image: 
-        linear-gradient(rgba(154, 255, 154, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(154, 255, 154, 0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
+      /* Depth Vignette */
+      background: radial-gradient(circle at center, rgba(10, 30, 10, 0.2) 0%, rgba(0, 0, 0, 1) 80%);
     }
 
     #scan-line {
       position: absolute;
       left: 0;
       width: 100vw;
-      height: 1px;
-      background: rgba(154, 255, 154, 0.2);
-      animation: scanVertical 10s linear infinite;
+      height: 2px;
+      background: linear-gradient(to bottom, transparent, rgba(154, 255, 154, 0.15), transparent);
+      animation: scanVertical 8s linear infinite;
     }
 
     @keyframes scanVertical {
-      0% { top: -2%; }
-      100% { top: 102%; }
+      0% { top: -5%; }
+      100% { top: 105%; }
     }
 
-    /* --- 3. UNIFORM CONTENT --- */
+    /* --- 3. CONTENT & TYPOGRAPHY --- */
     .container {
       position: relative;
       z-index: 10;
       max-width: 500px;
       margin: 0 auto;
-      padding: 60px 24px;
+      padding: 80px 24px;
     }
 
     h1 {
       font-size: 14px;
       font-weight: 500;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.3em;
       text-transform: uppercase;
       margin-bottom: 4px;
+      text-shadow: 0 0 10px rgba(154, 255, 154, 0.3);
     }
 
     .address {
       font-size: 11px;
-      opacity: 0.7;
-      margin-bottom: 40px;
+      opacity: 0.5;
+      margin-bottom: 60px;
+      letter-spacing: 0.1em;
     }
 
     h2 {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      border-top: 1px solid #133;
+      letter-spacing: 0.2em;
+      border-top: 1px solid rgba(154, 255, 154, 0.1);
       padding-top: 20px;
-      margin-top: 30px;
+      margin-top: 40px;
+      color: rgba(154, 255, 154, 0.6);
     }
 
     p {
-      font-size: 11px;
+      font-size: 12px;
       opacity: 0.8;
-      margin: 8px 0;
+      margin: 12px 0;
     }
 
     .highlight {
       color: #9aff9a;
       font-weight: bold;
+      text-shadow: 0 0 8px rgba(154, 255, 154, 0.4);
     }
 
-    /* --- 4. GREEN MAP & CONVERGENT ARCS --- */
+    /* Interactive Code Button */
+    .code-btn {
+      display: inline-block;
+      background: rgba(154, 255, 154, 0.05);
+      border: 1px solid rgba(154, 255, 154, 0.4);
+      color: #9aff9a;
+      padding: 4px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      margin: 0 4px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 5px rgba(154, 255, 154, 0.1);
+    }
+
+    .code-btn:hover {
+      background: rgba(154, 255, 154, 0.15);
+      border-color: #9aff9a;
+    }
+
+    .code-btn:active {
+      background: #9aff9a;
+      color: #000;
+      box-shadow: 0 0 15px #9aff9a;
+    }
+
+    /* --- 4. THE MAP (TRUE DARK FIX) --- */
     .map-wrapper {
       position: relative;
       width: 100%;
-      height: 350px;
-      margin-top: 40px;
-      border: 1px solid #133;
+      height: 380px;
+      margin-top: 60px;
+      border: 1px solid rgba(154, 255, 154, 0.1);
       background: #000;
       overflow: hidden;
+      box-shadow: inset 0 0 50px #000;
     }
 
     iframe {
       width: 100%;
       height: 100%;
       border: none;
-      /* Monochromatic Green Filter */
-      filter: sepia(100%) hue-rotate(85deg) brightness(0.6) contrast(1.2) invert(1);
+      /* Invert first, then tint green */
+      filter: invert(100%) grayscale(100%) sepia(100%) hue-rotate(90deg) brightness(0.7) contrast(1.1);
+      opacity: 0.7;
     }
 
     canvas {
@@ -125,16 +150,31 @@
 
     .hud-label {
       font-size: 9px;
-      opacity: 0.4;
+      opacity: 0.3;
       margin-top: 10px;
       text-align: right;
+      letter-spacing: 0.1em;
+    }
+
+    #copy-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      background: #9aff9a;
+      color: #000;
+      padding: 6px 16px;
+      display: none;
+      z-index: 100;
+      font-weight: bold;
+      letter-spacing: 0.1em;
     }
   </style>
 </head>
 <body>
 
 <div id="bg-layer">
-  <div id="grid"></div>
   <div id="scan-line"></div>
 </div>
 
@@ -145,26 +185,30 @@
   <section>
     <h2>Step 1: Front Door</h2>
     <p>• Locate the <span class="highlight">Call Box</span>.</p>
-    <p>• Dial <span class="highlight">308 + CALL</span> or find <span class="highlight">3E-01</span>.</p>
+    <p>• Dial <button class="code-btn" onclick="copyCode('308')">308</button> + <span class="highlight">CALL</span>.</p>
+    <p>• Or scroll to find <span class="highlight">3E-01</span>.</p>
     <p>• I must answer my phone to buzz you in.</p>
-    <p style="opacity: 0.4;">(Note: Direct calls/texts do not unlock the door.)</p>
   </section>
 
   <section>
-    <h2>Step 2: Inside</h2>
-    <p>• <span class="highlight">DO NOT</span> use the front stairs.</p>
-    <p>• Walk to the <span class="highlight">BACK</span> of the hallway.</p>
-    <p>• Use the <span class="highlight">BACK STAIRS</span> to reach 3E.</p>
+    <h2>Step 2: Interior Routing</h2>
+    <p>• <span class="highlight">ABORT</span> front stairs.</p>
+    <p>• Proceed to the <span class="highlight">BACK</span> of the ground floor.</p>
+    <p>• Utilize <span class="highlight">REAR STAIRWELL</span> for floor 3.</p>
   </section>
 
   <div class="map-wrapper">
+    <!-- Replace the src below with your actual Google Maps Embed link for maximum accuracy -->
     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3025.218447816041!2d-73.96145342341908!3d40.669145638890474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25b084992925b%3A0x6d907f14b3d739e1!2s1004%20Union%20St%2C%20Brooklyn%2C%20NY%2011225!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"></iframe>
     <canvas id="arc-canvas"></canvas>
   </div>
   <div class="hud-label">VECTORS: CONVERGING ON SITE</div>
 </div>
 
+<div id="copy-toast">BUFFER COPIED: 308</div>
+
 <script>
+  // --- CONVERGENT ARC ANIMATION ---
   const canvas = document.getElementById("arc-canvas");
   const ctx = canvas.getContext("2d");
   const DPR = window.devicePixelRatio || 1;
@@ -184,27 +228,47 @@
     ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
     const cx = (canvas.width / DPR) / 2;
     const cy = (canvas.height / DPR) / 2;
-    const maxR = Math.max(cx, cy) * 1.2;
+    const maxR = Math.max(cx, cy) * 1.5;
 
-    for (let i = 0; i < 10; i++) {
-      let r = (maxR - ((phase * 100 + i * 40) % maxR));
+    for (let i = 0; i < 8; i++) {
+      let r = (maxR - ((phase * 80 + i * 60) % maxR));
       if (r > 0) {
-        const opacity = (1 - (r / maxR)) * 0.5;
+        const opacity = (1 - (r / maxR)) * 0.4;
         ctx.strokeStyle = `rgba(154, 255, 154, ${opacity})`;
         ctx.lineWidth = 1;
 
-        for (let j = 0; j < 4; j++) {
-          let start = (j * Math.PI / 2) + (phase * 0.1);
+        for (let j = 0; j < 3; j++) {
+          let start = (j * (Math.PI * 2) / 3) + (phase * 0.05);
           ctx.beginPath();
-          ctx.arc(cx, cy, r, start, start + 0.3);
+          ctx.arc(cx, cy, r, start, start + 0.5);
           ctx.stroke();
         }
       }
     }
-    phase += 0.04;
+    phase += 0.03;
     requestAnimationFrame(draw);
   }
   draw();
+
+  // --- LOGISTICS LOGIC ---
+  function copyCode(text) {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+
+    const toast = document.getElementById('copy-toast');
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 1500);
+    
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate(40);
+    }
+  }
 </script>
 
 </body>
