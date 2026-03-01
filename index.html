@@ -2,272 +2,237 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3E Logistics</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>3E LOGISTICS ACCESS</title>
   <style>
-    /* --- 1. GLOBAL SYSTEM --- */
+    /* --- 1. CORE SYSTEM --- */
+    :root {
+      --phosphor: #9aff9a;
+      --bg: #010401;
+      --dim: rgba(154, 255, 154, 0.4);
+      --faint: rgba(154, 255, 154, 0.1);
+      --mono: 'JetBrains Mono', 'Cascadia Code', ui-monospace, monospace;
+    }
+
     html, body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #9aff9a;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    /* --- 2. ATMOSPHERIC LAYERS --- */
-    #bg-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-      /* Depth Vignette */
-      background: radial-gradient(circle at center, rgba(10, 30, 10, 0.2) 0%, rgba(0, 0, 0, 1) 80%);
-    }
-
-    #scan-line {
-      position: absolute;
-      left: 0;
-      width: 100vw;
-      height: 2px;
-      background: linear-gradient(to bottom, transparent, rgba(154, 255, 154, 0.15), transparent);
-      animation: scanVertical 8s linear infinite;
-    }
-
-    @keyframes scanVertical {
-      0% { top: -5%; }
-      100% { top: 105%; }
-    }
-
-    /* --- 3. CONTENT & TYPOGRAPHY --- */
-    .container {
-      position: relative;
-      z-index: 10;
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 80px 24px;
-    }
-
-    h1 {
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      text-shadow: 0 0 10px rgba(154, 255, 154, 0.3);
-    }
-
-    .address {
-      font-size: 11px;
-      opacity: 0.5;
-      margin-bottom: 60px;
-      letter-spacing: 0.1em;
-    }
-
-    h2 {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      border-top: 1px solid rgba(154, 255, 154, 0.1);
-      padding-top: 20px;
-      margin-top: 40px;
-      color: rgba(154, 255, 154, 0.6);
-    }
-
-    p {
-      font-size: 12px;
-      opacity: 0.8;
-      margin: 12px 0;
-    }
-
-    .highlight {
-      color: #9aff9a;
-      font-weight: bold;
-      text-shadow: 0 0 8px rgba(154, 255, 154, 0.4);
-    }
-
-    /* Interactive Code Button */
-    .code-btn {
-      display: inline-block;
-      background: rgba(154, 255, 154, 0.05);
-      border: 1px solid rgba(154, 255, 154, 0.4);
-      color: #9aff9a;
-      padding: 4px 12px;
-      cursor: pointer;
-      font-size: 12px;
-      font-family: inherit;
-      margin: 0 4px;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 5px rgba(154, 255, 154, 0.1);
-    }
-
-    .code-btn:hover {
-      background: rgba(154, 255, 154, 0.15);
-      border-color: #9aff9a;
-    }
-
-    .code-btn:active {
-      background: #9aff9a;
-      color: #000;
-      box-shadow: 0 0 15px #9aff9a;
-    }
-
-    /* --- 4. THE MAP (TRUE DARK FIX) --- */
-    .map-wrapper {
-      position: relative;
-      width: 100%;
-      height: 380px;
-      margin-top: 60px;
-      border: 1px solid rgba(154, 255, 154, 0.1);
-      background: #000;
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--phosphor);
+      font-family: var(--mono);
       overflow: hidden;
-      box-shadow: inset 0 0 50px #000;
+      height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+      text-transform: uppercase;
+    }
+
+    /* --- 2. THE ANALOG GRAIN --- */
+    #noise {
+      position: fixed; inset: -50%; width: 200%; height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.1; pointer-events: none; z-index: 1000;
+      animation: noise-shift 0.15s infinite;
+      filter: contrast(180%) brightness(15%);
+    }
+    @keyframes noise-shift {
+      0%, 100% { transform: translate(0,0); }
+      50% { transform: translate(-1%, 0.5%); }
+    }
+
+    .sweep {
+      position: fixed; inset: 0; height: 12vh;
+      background: linear-gradient(to bottom, transparent, rgba(154, 255, 154, 0.03), transparent);
+      animation: sweep 12s linear infinite;
+      pointer-events: none; z-index: 900;
+    }
+    @keyframes sweep {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(110vh); }
+    }
+
+    /* --- 3. LAYOUT ARCHITECTURE --- */
+    .container {
+      position: relative; z-index: 10;
+      max-width: 440px; margin: 0 auto;
+      height: 100dvh; display: flex; flex-direction: column;
+      padding: 50px 32px 30px; box-sizing: border-box;
+    }
+
+    /* Header: Aligned Left for unified vertical flow */
+    header {
+      text-align: left;
+      margin-bottom: 45px;
+      flex-shrink: 0;
+    }
+    .id-block h1 {
+      margin: 0; font-size: 14px; letter-spacing: 0.4em;
+      font-weight: 500; text-shadow: 0 0 10px rgba(154, 255, 154, 0.4);
+    }
+    .id-block .sub {
+      font-size: 8px; opacity: 0.4; letter-spacing: 0.2em; margin-top: 6px;
+    }
+
+    /* Instruction Block: Flush & Direct */
+    .instruction-block {
+      flex-shrink: 0;
+      margin-bottom: 40px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      margin-bottom: 14px;
+      align-items: baseline;
+    }
+    .row .n {
+      font-size: 9px; color: var(--dim); font-weight: 700;
+    }
+    .row .t {
+      font-size: 14px; letter-spacing: 0.01em; opacity: 0.95;
+    }
+
+    .btn-copy {
+      background: rgba(154, 255, 154, 0.08);
+      border: 1px solid var(--dim);
+      color: var(--phosphor);
+      padding: 1px 10px; font-family: inherit;
+      cursor: pointer; font-size: 13px; margin: 0 4px;
+      transition: all 0.2s;
+    }
+    .btn-copy:active { background: var(--phosphor); color: #000; }
+
+    /* Tactical Map Viewport */
+    .viewport {
+      position: relative; width: 100%; flex-grow: 1;
+      background: #000; border: 1px solid var(--faint);
+      overflow: hidden; margin-bottom: 12px;
+    }
+    .viewport::after {
+      content: ""; position: absolute; top: 50%; left: 50%;
+      width: 40px; height: 40px; transform: translate(-50%, -50%);
+      pointer-events: none;
+      background: 
+        linear-gradient(to right, var(--phosphor) 2px, transparent 2px) 50% 50% / 12px 1px no-repeat,
+        linear-gradient(to bottom, var(--phosphor) 2px, transparent 2px) 50% 50% / 1px 12px no-repeat;
+      opacity: 0.4;
     }
 
     iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      /* Invert first, then tint green */
-      filter: invert(100%) grayscale(100%) sepia(100%) hue-rotate(90deg) brightness(0.7) contrast(1.1);
-      opacity: 0.7;
+      width: 100%; height: 100%; border: none;
+      filter: invert(100%) grayscale(100%) sepia(100%) hue-rotate(90deg) brightness(0.5) contrast(1.4);
+      opacity: 0.55;
+    }
+    canvas { position: absolute; inset: 0; pointer-events: none; }
+
+    /* Footer: Pure Data */
+    footer {
+      display: flex; justify-content: space-between;
+      font-size: 8px; opacity: 0.3; letter-spacing: 0.2em;
     }
 
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 20;
-    }
-
-    .hud-label {
-      font-size: 9px;
-      opacity: 0.3;
-      margin-top: 10px;
-      text-align: right;
-      letter-spacing: 0.1em;
-    }
-
-    #copy-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 10px;
-      background: #9aff9a;
-      color: #000;
-      padding: 6px 16px;
-      display: none;
-      z-index: 100;
-      font-weight: bold;
-      letter-spacing: 0.1em;
+    #toast {
+      position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+      background: var(--phosphor); color: #000;
+      padding: 10px 24px; font-size: 10px; font-weight: 900;
+      display: none; z-index: 2000;
     }
   </style>
 </head>
 <body>
 
-<div id="bg-layer">
-  <div id="scan-line"></div>
-</div>
+<div id="noise"></div>
+<div class="sweep"></div>
 
 <div class="container">
-  <h1>Entry Sequence</h1>
-  <div class="address">1004 UNION ST / APT 3E</div>
+  <header>
+    <div class="id-block">
+      <h1>1004 UNION ST // 3E</h1>
+      <div class="sub">BROOKLYN ACCESS PROTOCOL</div>
+    </div>
+  </header>
 
-  <section>
-    <h2>Step 1: Front Door</h2>
-    <p>• Locate the <span class="highlight">Call Box</span>.</p>
-    <p>• Dial <button class="code-btn" onclick="copyCode('308')">308</button> + <span class="highlight">CALL</span>.</p>
-    <p>• Or scroll to find <span class="highlight">3E-01</span>.</p>
-    <p>• I must answer my phone to buzz you in.</p>
-  </section>
-
-  <section>
-    <h2>Step 2: Interior Routing</h2>
-    <p>• <span class="highlight">ABORT</span> front stairs.</p>
-    <p>• Proceed to the <span class="highlight">BACK</span> of the ground floor.</p>
-    <p>• Utilize <span class="highlight">REAR STAIRWELL</span> for floor 3.</p>
-  </section>
-
-  <div class="map-wrapper">
-    <!-- Replace the src below with your actual Google Maps Embed link for maximum accuracy -->
-    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3025.218447816041!2d-73.96145342341908!3d40.669145638890474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25b084992925b%3A0x6d907f14b3d739e1!2s1004%20Union%20St%2C%20Brooklyn%2C%20NY%2011225!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"></iframe>
-    <canvas id="arc-canvas"></canvas>
+  <div class="instruction-block">
+    <div class="row">
+      <span class="n">01</span>
+      <span class="t">DIAL <button class="btn-copy" onclick="copy('308')">308</button> + CALL</span>
+    </div>
+    <div class="row">
+      <span class="n">02</span>
+      <span class="t">WAIT FOR AUDIO BUZZER</span>
+    </div>
+    <div class="row">
+      <span class="n">03</span>
+      <span class="t">BYPASS LOBBY STAIRS</span>
+    </div>
+    <div class="row">
+      <span class="n">04</span>
+      <span class="t">WALK TO END OF GROUND FLOOR</span>
+    </div>
+    <div class="row">
+      <span class="n">05</span>
+      <span class="t">USE REAR STAIRS [FL 3]</span>
+    </div>
   </div>
-  <div class="hud-label">VECTORS: CONVERGING ON SITE</div>
+
+  <div class="viewport">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3025.218447816041!2d-73.96145342341908!3d40.669145638890474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25b084992925b%3A0x6d907f14b3d739e1!2s1004%20Union%20St%2C%20Brooklyn%2C%20NY%2011225!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"></iframe>
+    <canvas id="radar"></canvas>
+  </div>
+  
+  <footer>
+    <span id="time">00:00:00</span>
+    <span>3E LOGISTICS // SITE ACTIVE</span>
+  </footer>
 </div>
 
-<div id="copy-toast">BUFFER COPIED: 308</div>
+<div id="toast">CODE COPIED</div>
 
 <script>
-  // --- CONVERGENT ARC ANIMATION ---
-  const canvas = document.getElementById("arc-canvas");
-  const ctx = canvas.getContext("2d");
-  const DPR = window.devicePixelRatio || 1;
-
-  function resize() {
-    canvas.width = canvas.offsetWidth * DPR;
-    canvas.height = canvas.offsetHeight * DPR;
-    ctx.scale(DPR, DPR);
+  function updateTime() {
+    const n = new Date();
+    document.getElementById('time').textContent = n.getHours().toString().padStart(2, '0') + ":" + n.getMinutes().toString().padStart(2, '0') + ":" + n.getSeconds().toString().padStart(2, '0');
   }
+  setInterval(updateTime, 1000); updateTime();
 
-  window.addEventListener("resize", resize);
-  resize();
-
+  const canvas = document.getElementById("radar");
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
   let phase = 0;
 
+  function res() {
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  window.onresize = res; res();
+
   function draw() {
-    ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
-    const cx = (canvas.width / DPR) / 2;
-    const cy = (canvas.height / DPR) / 2;
-    const maxR = Math.max(cx, cy) * 1.5;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const w = canvas.width/dpr, h = canvas.height/dpr;
+    const cx = w/2, cy = h/2, max = Math.max(w, h);
 
-    for (let i = 0; i < 8; i++) {
-      let r = (maxR - ((phase * 80 + i * 60) % maxR));
-      if (r > 0) {
-        const opacity = (1 - (r / maxR)) * 0.4;
-        ctx.strokeStyle = `rgba(154, 255, 154, ${opacity})`;
+    for(let i=0; i<6; i++) {
+      let r = (max*1.1 - ((phase*40 + i*75) % (max*1.1)));
+      if(r > 0) {
+        ctx.strokeStyle = `rgba(154,255,154,${(1-(r/(max*1.1)))*0.25})`;
         ctx.lineWidth = 1;
-
-        for (let j = 0; j < 3; j++) {
-          let start = (j * (Math.PI * 2) / 3) + (phase * 0.05);
-          ctx.beginPath();
-          ctx.arc(cx, cy, r, start, start + 0.5);
-          ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, phase*0.04 + (i*Math.PI/3), phase*0.04 + (i*Math.PI/3) + 0.6);
+        ctx.stroke();
       }
     }
-    phase += 0.03;
+    phase += 0.04;
     requestAnimationFrame(draw);
   }
   draw();
 
-  // --- LOGISTICS LOGIC ---
-  function copyCode(text) {
+  function copy(val) {
     const el = document.createElement('textarea');
-    el.value = text;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
+    el.value = val; document.body.appendChild(el);
+    el.select(); document.execCommand('copy');
     document.body.removeChild(el);
-
-    const toast = document.getElementById('copy-toast');
+    const toast = document.getElementById('toast');
     toast.style.display = 'block';
-    setTimeout(() => {
-      toast.style.display = 'none';
-    }, 1500);
-    
-    if (window.navigator.vibrate) {
-      window.navigator.vibrate(40);
-    }
+    setTimeout(()=> toast.style.display='none', 1200);
+    if(navigator.vibrate) navigator.vibrate([40, 20]);
   }
 </script>
 
